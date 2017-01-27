@@ -30,8 +30,11 @@ So have fun with the program (or not :P) and feel free to report any bugs you ma
 
 ## Downloads (Java required)
 - [Windows executable](https://github.com/RoanH/osu-BonusPP/raw/master/BonusPP.exe) (Windows might complain about it being an unsafe file :o )
-- [Runnable Java Archive](https://github.com/RoanH/osu-BonusPP/raw/master/BonusPP.jar) (Apparently Windows doesn't complain about Runnable Jars :D 
+- [Runnable Java Archive](https://github.com/RoanH/osu-BonusPP/raw/master/BonusPP.jar) (Apparently Windows doesn't complain about Runnable Jars :D )
 
 ## Implementation details
 This program calculates the amount of bonus PP a player has using their top 100 scores.
 First it adds the top 100 scores together and then it uses linear regression to account for pp gained from plays that are no longer in the top 100 (I actually wouldn't mind if someone checked the statistics xD The returned results look plausible though so I think everything checks out).
+
+## History
+Project development started: 27 December 2016
