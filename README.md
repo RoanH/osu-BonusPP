@@ -10,15 +10,15 @@ Public GitHub repository: [link](https://github.com/RoanH/osu-BonusPP)
 So a little while back a friend of mine asked me to write a program to calculate how much bonus PP he had.
 And after writing said program I figured, why not share it with the rest of the community?
 
-For those of you that don't know what bonus PP is, it's basically PP awarded for having passes on a certain number of maps. You can read more about this on the [wiki](https://osu.ppy.sh/wiki/Performance_Points).
+For those of you that don't know what bonus PP is, it's basically PP awarded for having passes on a certain number of maps. You can read more about this on the [wiki](https://osu.ppy.sh/wiki/Performance_Points).    
 ![Bonus PP Table](https://i.ppy.sh/99970ce4d162a4dcb6d8afd86e1281b17ba095d2/687474703a2f2f772e7070792e73682f662f66372f4f7375626f6e757370702e706e67)
 
 To use the program you will need an osu! API key, which you can get [here](https://osu.ppy.sh/p/api).
 
-After you run the program you should see the following form:
+After you run the program you should see the following form:    
 ![Input Form](https://i.ppy.sh/bf5a0a47bc8e637a84b0286f21b1a6e7e1b946d6/687474703a2f2f692e696d6775722e636f6d2f6d4f59626859382e706e67)
 
-After you fill in the details you should get an output like this:
+After you fill in the details you should get an output like this:    
 ![Output Form](https://i.ppy.sh/18b9cdf3f27a90b0afe5efb567bb90912c25af8c/687474703a2f2f692e696d6775722e636f6d2f303947744379712e706e67)
 
 It'll tell you both the amount of bonus PP you have and from that it'll also calculate the number of ranked scores/passes you have.
