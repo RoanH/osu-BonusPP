@@ -30,16 +30,16 @@ import me.roan.bonuspp.BonusPP.Scores.Score;
  * amount of osu! bonus PP a player has.
  * @author Roan
  */
-public class BonusPP {
+public class BonusPP{
 
 	/**
 	 * @param args It's possible to call the program
 	 *        with your osu! API key as command line argument.
 	 */
 	public static void main(String[] args){
-		try {
+		try{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+		}catch(ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e){
 		}
 		JPanel form = new JPanel(new BorderLayout());
 		JPanel labels = new JPanel(new GridLayout(3, 0));
@@ -62,51 +62,51 @@ public class BonusPP {
 		if(api.getText().isEmpty() || name.getText().isEmpty() || option == 1){
 			System.exit(0);
 		}
-		
+
 		String MODE = String.valueOf(modes.getSelectedIndex());
-		String APIKEY = api.getText(); 
+		String APIKEY = api.getText();
 		String USER = name.getText();
 		String req = getPage("https://osu.ppy.sh/api/get_user?k=" + APIKEY + "&u=" + USER + "&type=string&m=" + MODE);
 		String user = req.substring(1, req.length() - 1).split(",\"events\"")[0] + "}";
 		String best = "{scores:" + getPage("https://osu.ppy.sh/api/get_user_best?k=" + APIKEY + "&u=" + USER + "&limit=100&type=string&m=" + MODE) + "}";
-		
+
 		Gson gson = new Gson();
 		Scores s = gson.fromJson(best, Scores.class);
 		double scorepp = calculateScorePP(s);
 		double totalpp = gson.fromJson(user, User.class).pp_raw;
 		double bonuspp = totalpp - scorepp;
-		
+
 		Border border = BorderFactory.createLineBorder(Color.BLACK);
 		JPanel msg = new JPanel(new GridLayout(4, 2, 10, 0));
 		msg.setBorder(BorderFactory.createTitledBorder(border, "<html><b>" + USER + "</b> (" + modes.getSelectedItem() + ")</html>"));
-		
+
 		msg.add(new JLabel("<html><b>Bonus PP:</b></html>"));
 		msg.add(new JLabel(String.valueOf((int)bonuspp)));
-		
+
 		msg.add(new JLabel("<html><b>Total PP:</b></html>"));
 		msg.add(new JLabel(String.valueOf((int)totalpp)));
-		
+
 		msg.add(new JLabel("<html><b>Total PP (without bonus):</b></html>"));
 		msg.add(new JLabel(String.valueOf((int)scorepp)));
-		
+
 		msg.add(new JLabel("<html><b>Number of ranked scores:</b></html>"));
 		int ns = ((int)(Math.log10(-(bonuspp / 416.6667D) + 1.0D) / Math.log10(0.9994D)));
 		msg.add(new JLabel(String.valueOf((ns == 0 && bonuspp > 0.0D) ? "25397+" : String.valueOf(ns))));
-		
+
 		JPanel graph = new Graph(s);
 		JPanel graphpanel = new JPanel(new BorderLayout());
 		graphpanel.add(graph, BorderLayout.CENTER);
 		graphpanel.setBorder(BorderFactory.createTitledBorder(border, "PP score graph"));
-		
+
 		JPanel content = new JPanel(new BorderLayout());
 		content.add(msg, BorderLayout.PAGE_START);
 		content.add(graphpanel, BorderLayout.CENTER);
-				
+
 		if(JOptionPane.showOptionDialog(null, content, "Bonus PP", 0, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"Close", "Lookup another player"}, 0) == 1){
 			main(new String[]{APIKEY});
 		}
 	}
-	
+
 	/**
 	 * Calculates the amount of non-bonus PP
 	 * a player has. This is done by adding 
@@ -124,7 +124,7 @@ public class BonusPP {
 		}
 		return scorepp + extraPolatePPRemainder(s);
 	}
-	
+
 	/**
 	 * Calculates the amount of PP a player
 	 * has from non-top-100 scores. Especially 
@@ -176,7 +176,7 @@ public class BonusPP {
 		double sumOx2 = 0.0D;
 		double avgX = 0.0D;
 		double avgY = 0.0D;
-		for(Score sc: s.scores){
+		for(Score sc : s.scores){
 			avgX++;
 			avgY += sc.pp;
 		}
@@ -192,7 +192,7 @@ public class BonusPP {
 		double Ox2 = sumOx2 / s.scores.size();
 		return new double[]{avgY - (Oxy / Ox2) * avgX, Oxy / Ox2};
 	}
-	
+
 	/**
 	 * Custom JPanel to draw graphs on
 	 * @author Roan
@@ -206,7 +206,7 @@ public class BonusPP {
 		 * A list of points for the graph
 		 */
 		private Scores scores;
-		
+
 		/**
 		 * Creates a new Graph object with the given points
 		 * @param s
@@ -214,7 +214,7 @@ public class BonusPP {
 		private Graph(Scores s){
 			scores = s;
 		}
-		
+
 		/**
 		 * Only returns the preferred height
 		 * for this component since the width
@@ -224,7 +224,7 @@ public class BonusPP {
 		public Dimension getPreferredSize(){
 			return new Dimension(0, 100);
 		}
-		
+
 		/**
 		 * Paints both the Raw PP graph and
 		 * the Weighted PP graph
@@ -234,23 +234,23 @@ public class BonusPP {
 			double w = this.getWidth();
 			double h = this.getHeight();
 			double maxpp = scores.scores.get(0).pp;
-			
+
 			double dx = w / scores.scores.size();
 			double dy = h / (maxpp + 2);
-					
+
 			for(int i = 0; i < scores.scores.size(); i++){
 				g.setColor(Color.BLUE);
-				g.fillOval((int) (i * dx), (int) (h - (dy * (scores.scores.get(i).pp + 2))), 2, 2);
+				g.fillOval((int)(i * dx), (int)(h - (dy * (scores.scores.get(i).pp + 2))), 2, 2);
 				g.setColor(Color.GREEN);
-				g.fillOval((int) (i * dx), (int) (h - (dy * ((scores.scores.get(i).pp * Math.pow(0.95D, i)) + 2))), 2, 2);
+				g.fillOval((int)(i * dx), (int)(h - (dy * ((scores.scores.get(i).pp * Math.pow(0.95D, i)) + 2))), 2, 2);
 			}
 			g.setColor(Color.BLUE);
-			g.drawString("Raw PP", (int) ((scores.scores.size() / 2.0D) * dx), (int) (h - (dy * (scores.scores.get((int) (scores.scores.size() / 2.0D)).pp + 2))) - 2);
+			g.drawString("Raw PP", (int)((scores.scores.size() / 2.0D) * dx), (int)(h - (dy * (scores.scores.get((int)(scores.scores.size() / 2.0D)).pp + 2))) - 2);
 			g.setColor(Color.GREEN.darker());
-			g.drawString("Weighted PP", (int) ((scores.scores.size() / 2.0D) * dx), (int) (h - (dy * ((scores.scores.get((int) (scores.scores.size() / 2.0D)).pp * Math.pow(0.95D, (scores.scores.size() / 2.0D))) + 2))) - 2);
+			g.drawString("Weighted PP", (int)((scores.scores.size() / 2.0D) * dx), (int)(h - (dy * ((scores.scores.get((int)(scores.scores.size() / 2.0D)).pp * Math.pow(0.95D, (scores.scores.size() / 2.0D))) + 2))) - 2);
 		}
 	}
-	
+
 	/**
 	 * A class that follows the
 	 * same structure as the 
@@ -267,7 +267,7 @@ public class BonusPP {
 		 */
 		double pp_raw;
 	}
-	
+
 	/**
 	 * A class that follows the
 	 * same structure as the 
@@ -281,7 +281,7 @@ public class BonusPP {
 		 * The top scores of the user
 		 */
 		List<Score> scores;
-		
+
 		/**
 		 * A class that follows the
 		 * same structure as the 
@@ -298,7 +298,7 @@ public class BonusPP {
 			double pp;
 		}
 	}
-	
+
 	/**
 	 * Used to make API calls. This method
 	 * gets the JSON string returned
@@ -308,14 +308,14 @@ public class BonusPP {
 	 */
 	private static final String getPage(String url){
 		try{
-			HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+			HttpURLConnection con = (HttpURLConnection)new URL(url).openConnection();
 			con.setRequestMethod("GET");
 			con.setConnectTimeout(10000);
-			
-		    BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-		    String line = reader.readLine();
-		    reader.close();
-		    return line;
+
+			BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String line = reader.readLine();
+			reader.close();
+			return line;
 		}catch(Exception e){
 			return null;
 		}
