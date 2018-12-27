@@ -154,7 +154,7 @@ public class BonusPP{
 			JDialog dialog = optionPane.createDialog("Bonus PP");
 			dialog.setIconImage(icon);
 			dialog.setVisible(true);
-			if(api.getText().isEmpty() || name.getText().isEmpty() || options[1].equals(optionPane.getValue())){
+			if(options[1].equals(optionPane.getValue())){
 				System.exit(0);
 			}
 		}
@@ -163,6 +163,13 @@ public class BonusPP{
 		String APIKEY = api.getText();
 		String USER = name.getText();
 		String req = getPage("https://osu.ppy.sh/api/get_user?k=" + APIKEY + "&u=" + USER + "&type=string&m=" + MODE);
+		if(req == null){
+			JOptionPane optionPane = new JOptionPane("No user with the given username exists or the given API key is not valid.", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"OK"}, 0);
+			JDialog dialog = optionPane.createDialog("Bonus PP");
+			dialog.setIconImage(icon);
+			dialog.setVisible(true);
+			main(new String[]{APIKEY});
+		}
 		String user = req.substring(1, req.length() - 1).split(",\"events\"")[0] + "}";
 		String best = "{scores:" + getPage("https://osu.ppy.sh/api/get_user_best?k=" + APIKEY + "&u=" + USER + "&limit=100&type=string&m=" + MODE) + "}";
 
@@ -418,7 +425,7 @@ public class BonusPP{
 			BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
 			String line = reader.readLine();
 			reader.close();
-			return line;
+			return line.equals("[]") ? null : line;
 		}catch(Exception e){
 			return null;
 		}
