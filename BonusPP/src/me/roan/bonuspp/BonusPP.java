@@ -148,24 +148,20 @@ public class BonusPP{
 		
 		Image icon = null;
 		try{
-			icon = ImageIO.read(new File("C:\\Users\\RoanH\\Desktop\\Java Programms\\Executables\\pp.png"));
+			icon = ImageIO.read(ClassLoader.getSystemResource("pp.png"));
 		}catch(IOException e1){
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
 		}
 		
 		{
-			String[] options = new String[]{"Ok", "Cancel"};
+			String[] options = new String[]{"OK", "Cancel"};
 			JOptionPane optionPane = new JOptionPane(form, JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, 0);
 			JDialog dialog = optionPane.createDialog("Bonus PP");
 			dialog.setIconImage(icon);
 			dialog.setVisible(true);
+			if(api.getText().isEmpty() || name.getText().isEmpty() || options[1].equals(optionPane.getValue())){
+				System.exit(0);
+			}
 		}
-		
-//		int option = JOptionPane.showOptionDialog(null, form, "Bonus PP", 0, JOptionPane.QUESTION_MESSAGE, icon, new String[]{"OK", "Cancel"}, 0);
-//		if(api.getText().isEmpty() || name.getText().isEmpty() || option == 1){
-//			System.exit(0);
-//		}
 
 		String MODE = String.valueOf(modes.getSelectedIndex());
 		String APIKEY = api.getText();
@@ -206,8 +202,15 @@ public class BonusPP{
 		content.add(msg, BorderLayout.PAGE_START);
 		content.add(graphpanel, BorderLayout.CENTER);
 
-		if(JOptionPane.showOptionDialog(null, content, "Bonus PP", 0, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"Close", "Lookup another player"}, 0) == 1){
-			main(new String[]{APIKEY});
+		{
+			String[] options = new String[]{"Close", "Lookup another player"};
+			JOptionPane optionPane = new JOptionPane(content, JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, 0);
+			JDialog dialog = optionPane.createDialog("Bonus PP");
+			dialog.setIconImage(icon);
+			dialog.setVisible(true);
+			if(options[1].equals(optionPane.getValue())){
+				main(new String[]{APIKEY});
+			}
 		}
 	}
 
