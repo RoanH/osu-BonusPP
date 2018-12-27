@@ -244,7 +244,7 @@ public class BonusPP{
 	 * @param s The list of the player's top scores
 	 * @return The amount of PP the player has from non-top-100 scores
 	 */
-	private static final double extraPolatePPRemainder(Scores s){
+	private static final strictfp double extraPolatePPRemainder(Scores s){
 		if(s.scores.size() < 100){
 			return 0.0D;
 		}
