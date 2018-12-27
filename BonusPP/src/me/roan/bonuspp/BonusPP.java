@@ -2,21 +2,34 @@ package me.roan.bonuspp;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.Border;
@@ -42,8 +55,8 @@ public class BonusPP{
 		}catch(ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e){
 		}
 		JPanel form = new JPanel(new BorderLayout());
-		JPanel labels = new JPanel(new GridLayout(3, 0));
-		JPanel fields = new JPanel(new GridLayout(3, 0));
+		JPanel labels = new JPanel(new GridLayout(3, 0, 0, 4));
+		JPanel fields = new JPanel(new GridLayout(3, 0, 0, 4));
 		JTextField api = new JTextField(args.length > 0 ? args[0] : null, 30);
 		JTextField name = new JTextField(30);
 		JComboBox<String> modes = new JComboBox<String>(new String[]{"osu! Standard", "osu! Taiko", "osu! Catch the Beat", "osu! Mania"});
@@ -58,10 +71,101 @@ public class BonusPP{
 		fields.add(modes);
 		form.add(labels, BorderLayout.WEST);
 		form.add(fields, BorderLayout.CENTER);
-		int option = JOptionPane.showOptionDialog(null, form, "Bonus PP", 0, JOptionPane.QUESTION_MESSAGE, null, new String[]{"OK", "Cancel"}, 0);
-		if(api.getText().isEmpty() || name.getText().isEmpty() || option == 1){
-			System.exit(0);
+		
+		JPanel info = new JPanel(new GridLayout(0, 1, 0, 2));
+		info.setBorder(BorderFactory.createEmptyBorder(5, 5, 0, 5));
+		JLabel ver = new JLabel("<html><center><i>Version: v1.1, latest version: <font color=gray>loading</font></i></center></html>", SwingConstants.CENTER);
+		info.add(ver);
+		new Thread(()->{
+			String version = checkVersion();//XXX the version number 
+			ver.setText("<html><center><i>Version: v1.1, latest version: " + (version == null ? "unknown :(" : version) + "</i></center></html>");
+		}, "Version Checker").start();
+		JPanel links = new JPanel(new GridLayout(1, 2, -2, 0));
+		JLabel forum = new JLabel("<html><font color=blue><u>Forums</u></font> -</html>", SwingConstants.RIGHT);
+		JLabel git = new JLabel("<html>- <font color=blue><u>GitHub</u></font></html>", SwingConstants.LEFT);
+		links.add(forum);
+		links.add(git);
+		forum.addMouseListener(new MouseListener(){
+
+			@Override
+			public void mouseClicked(MouseEvent e){
+				if(Desktop.isDesktopSupported()){
+					try{
+						Desktop.getDesktop().browse(new URL("https://osu.ppy.sh/community/forums/topics/538470").toURI());
+					}catch(IOException | URISyntaxException e1){
+						//pity
+					}
+				}
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e){
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e){
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e){
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e){
+			}
+		});
+		git.addMouseListener(new MouseListener(){
+
+			@Override
+			public void mouseClicked(MouseEvent e){
+				if(Desktop.isDesktopSupported()){
+					try{
+						Desktop.getDesktop().browse(new URL("https://github.com/RoanH/osu-BonusPP").toURI());
+					}catch(IOException | URISyntaxException e1){
+						//pity
+					}
+				}
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e){
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e){
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e){
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e){
+			}
+		});
+		info.add(links);
+		form.add(info, BorderLayout.PAGE_END);
+		
+		Image icon = null;
+		try{
+			icon = ImageIO.read(new File("C:\\Users\\RoanH\\Desktop\\Java Programms\\Executables\\pp.png"));
+		}catch(IOException e1){
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
+		
+		{
+			String[] options = new String[]{"Ok", "Cancel"};
+			JOptionPane optionPane = new JOptionPane(form, JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, 0);
+			JDialog dialog = optionPane.createDialog("Bonus PP");
+			dialog.setIconImage(icon);
+			dialog.setVisible(true);
+		}
+		
+//		int option = JOptionPane.showOptionDialog(null, form, "Bonus PP", 0, JOptionPane.QUESTION_MESSAGE, icon, new String[]{"OK", "Cancel"}, 0);
+//		if(api.getText().isEmpty() || name.getText().isEmpty() || option == 1){
+//			System.exit(0);
+//		}
 
 		String MODE = String.valueOf(modes.getSelectedIndex());
 		String APIKEY = api.getText();
@@ -318,6 +422,45 @@ public class BonusPP{
 			return line;
 		}catch(Exception e){
 			return null;
+		}
+	}
+	
+	/**
+	 * Checks the BonusPP version to see
+	 * if we are running the latest version
+	 * @return The latest version
+	 */
+	private static final String checkVersion(){
+		try{
+			HttpURLConnection con = (HttpURLConnection)new URL("https://api.github.com/repos/RoanH/osu-BonusPP/tags").openConnection();
+			con.setRequestMethod("GET");
+			con.addRequestProperty("Accept", "application/vnd.github.v3+json");
+			con.setConnectTimeout(10000);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String line = reader.readLine();
+			reader.close();
+			String[] versions = line.split("\"name\":\"v");
+			int max_main = 1;
+			int max_sub = 0;
+			String[] tmp;
+			for(int i = 1; i < versions.length; i++){
+				tmp = versions[i].split("\",\"")[0].split("\\.");
+				if(Integer.parseInt(tmp[0]) > max_main){
+					max_main = Integer.parseInt(tmp[0]);
+					max_sub = Integer.parseInt(tmp[1]);
+				}else if(Integer.parseInt(tmp[0]) < max_main){
+					continue;
+				}else{
+					if(Integer.parseInt(tmp[1]) > max_sub){
+						max_sub = Integer.parseInt(tmp[1]);
+					}
+				}
+			}
+			return "v" + max_main + "." + max_sub;
+		}catch(Exception e){
+			return null;
+			//No Internet access or something else is wrong,
+			//No problem though since this isn't a critical function
 		}
 	}
 }
