@@ -81,64 +81,8 @@ public class BonusPP{
 		JLabel git = new JLabel("<html>- <font color=blue><u>GitHub</u></font></html>", SwingConstants.LEFT);
 		links.add(forum);
 		links.add(git);
-		forum.addMouseListener(new MouseListener(){
-
-			@Override
-			public void mouseClicked(MouseEvent e){
-				if(Desktop.isDesktopSupported()){
-					try{
-						Desktop.getDesktop().browse(new URL("https://osu.ppy.sh/community/forums/topics/538470").toURI());
-					}catch(IOException | URISyntaxException e1){
-						//pity
-					}
-				}
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e){
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e){
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e){
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e){
-			}
-		});
-		git.addMouseListener(new MouseListener(){
-
-			@Override
-			public void mouseClicked(MouseEvent e){
-				if(Desktop.isDesktopSupported()){
-					try{
-						Desktop.getDesktop().browse(new URL("https://github.com/RoanH/osu-BonusPP").toURI());
-					}catch(IOException | URISyntaxException e1){
-						//pity
-					}
-				}
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e){
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e){
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e){
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e){
-			}
-		});
+		forum.addMouseListener(new LinkListener("https://osu.ppy.sh/community/forums/topics/538470"));
+		git.addMouseListener(new LinkListener("https://github.com/RoanH/osu-BonusPP"));
 		info.add(links);
 		form.add(info, BorderLayout.PAGE_END);
 		
@@ -406,6 +350,53 @@ public class BonusPP{
 			 * score is worth
 			 */
 			double pp;
+		}
+	}
+	
+	/**
+	 * Simple listener that opens the associated URL
+	 * in the system default web browser when clicked
+	 * @author Roan
+	 */
+	private static final class LinkListener implements MouseListener{
+		/**
+		 * The url to browse to when clicked
+		 */
+		private String url;
+		
+		/**
+		 * Creates a new LinkListener for the given url
+		 * @param url The url to browse to when clicked
+		 */
+		private LinkListener(String url){
+			this.url = url;
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent e){
+			if(Desktop.isDesktopSupported()){
+				try{
+					Desktop.getDesktop().browse(new URL(url).toURI());
+				}catch(IOException | URISyntaxException e1){
+					//pity
+				}
+			}
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e){
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e){
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e){
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e){
 		}
 	}
 
