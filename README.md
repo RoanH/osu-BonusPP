@@ -37,4 +37,4 @@ This program calculates the amount of bonus PP a player has using their top 100 
 First it adds the top 100 scores together and then it uses linear regression to account for pp gained from plays that are no longer in the top 100 (I actually wouldn't mind if someone checked the statistics xD The returned results look plausible though so I think everything checks out).
 
 ## History
-Project development started: 27 December 2016
+Project development started: 26 December 2016
