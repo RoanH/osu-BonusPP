@@ -116,12 +116,18 @@ public class BonusPP{
 		}
 		String user = req.substring(1, req.length() - 1).split(",\"events\"")[0] + "}";
 		String best = "{scores:" + getPage("https://osu.ppy.sh/api/get_user_best?k=" + APIKEY + "&u=" + USER + "&limit=100&type=string&m=" + MODE) + "}";
-
+		
 		Gson gson = new Gson();
 		Scores s = gson.fromJson(best, Scores.class);
+		//for(int i = 0; i < 10; i++){s.scores.remove(0);}
 		double scorepp = calculateScorePP(s);
 		double totalpp = gson.fromJson(user, User.class).pp_raw;
 		double bonuspp = totalpp - scorepp;
+		
+		int i = 1;
+		for(Score st : s.scores){
+			System.out.println(st.pp);
+		}
 
 		Border border = BorderFactory.createLineBorder(Color.BLACK);
 		JPanel msg = new JPanel(new GridLayout(4, 2, 10, 0));
@@ -176,6 +182,9 @@ public class BonusPP{
 		for(int i = 0; i < s.scores.size(); i++){
 			scorepp += s.scores.get(i).pp * Math.pow(0.95D, i);
 		}
+		for(int i = 0; i < 10; i++){
+			s.scores.remove(0);
+		}
 		return scorepp + extraPolatePPRemainder(s);
 	}
 
@@ -189,13 +198,13 @@ public class BonusPP{
 	 * @return The amount of PP the player has from non-top-100 scores
 	 */
 	private static final strictfp double extraPolatePPRemainder(Scores s){
-		if(s.scores.size() < 100){
+		if(s.scores.size() < 90){
 			return 0.0D;
 		}
 		double[] b = calculateLinearRegression(s);
-		double n = s.scores.size() + 1;
+		double n = s.scores.size() + 10;
 		double pp = 0.0D;
-		while(true){
+		while(n < 10000){
 			double val = (b[0] + b[1] * n) * Math.pow(0.95D, n);
 			if(val < 0.0D){
 				break;
@@ -234,9 +243,10 @@ public class BonusPP{
 			avgX++;
 			avgY += sc.pp;
 		}
-		avgX = avgX / s.scores.size();
+		avgX = ((s.scores.size() * (s.scores.size() + 1)) / 2) / s.scores.size();//50.5;//avgX / s.scores.size();
+		System.out.println(avgX);
 		avgY = avgY / s.scores.size();
-		double n = 0;
+		double n = 1;
 		for(Score sc : s.scores){
 			sumOxy += (n - avgX) * (sc.pp - avgY);
 			sumOx2 += Math.pow(n - avgX, 2.0D);
@@ -244,9 +254,9 @@ public class BonusPP{
 		}
 		double Oxy = sumOxy / s.scores.size();
 		double Ox2 = sumOx2 / s.scores.size();
-		return new double[]{avgY - (Oxy / Ox2) * avgX, Oxy / Ox2};
+		return linreg = new double[]{avgY - (Oxy / Ox2) * avgX, Oxy / Ox2};
 	}
-
+	private static double[] linreg;
 	/**
 	 * Custom JPanel to draw graphs on
 	 * @author Roan
@@ -298,6 +308,8 @@ public class BonusPP{
 				g.setColor(Color.GREEN);
 				g.fillOval((int)(i * dx), (int)(h - (dy * ((scores.scores.get(i).pp * Math.pow(0.95D, i)) + 2))), 2, 2);
 			}
+			System.out.println(linreg[0] + " + " + linreg[1] + "*x");
+			g.drawLine(0, (int)linreg[0], this.getWidth(), (int)(linreg[0] + linreg[1] * 100));
 			g.setColor(Color.BLUE);
 			g.drawString("Raw PP", (int)((scores.scores.size() / 2.0D) * dx), (int)(h - (dy * (scores.scores.get((int)(scores.scores.size() / 2.0D)).pp + 2))) - 2);
 			g.setColor(Color.GREEN.darker());
