@@ -119,11 +119,16 @@ public class BonusPP{
 		
 		Gson gson = new Gson();
 		Scores s = gson.fromJson(best, Scores.class);
+		
+		for(Score st : s.scores){
+			System.out.println(st.pp);
+		}
+		
 		//for(int i = 0; i < 10; i++){s.scores.remove(0);}
 		double scorepp = calculateScorePP(s);
 		double totalpp = gson.fromJson(user, User.class).pp_raw;
 		double bonuspp = totalpp - scorepp;
-		
+		System.out.println("Bonus: " + bonuspp);
 		int i = 1;
 		for(Score st : s.scores){
 			System.out.println(st.pp);
@@ -182,9 +187,7 @@ public class BonusPP{
 		for(int i = 0; i < s.scores.size(); i++){
 			scorepp += s.scores.get(i).pp * Math.pow(0.95D, i);
 		}
-		for(int i = 0; i < 10; i++){
-			s.scores.remove(0);
-		}
+		System.out.println("Score: " + scorepp);
 		return scorepp + extraPolatePPRemainder(s);
 	}
 
@@ -198,14 +201,17 @@ public class BonusPP{
 	 * @return The amount of PP the player has from non-top-100 scores
 	 */
 	private static final strictfp double extraPolatePPRemainder(Scores s){
-		if(s.scores.size() < 90){
+		if(s.scores.size() < 2){
 			return 0.0D;
 		}
 		double[] b = calculateLinearRegression(s);
-		double n = s.scores.size() + 10;
+		b[1] = 0;
+		double n = 100;
 		double pp = 0.0D;
-		while(n < 10000){
-			double val = (b[0] + b[1] * n) * Math.pow(0.95D, n);
+		while(n < 100000){
+			//double val = (3538.12858074605 / Math.log(400651.934228805 * n + 1)) * Math.pow(0.95D, n);//Roan
+			double val = (6373.608451239 / Math.log(3243.69270784438 * n + 1)) * Math.pow(0.95D, n);//WWW
+			//double val = (7874.83653689424 / Math.log(4906.65227561374 * n + 1)) * Math.pow(0.95D, n);//Cookiezi
 			if(val < 0.0D){
 				break;
 			}
