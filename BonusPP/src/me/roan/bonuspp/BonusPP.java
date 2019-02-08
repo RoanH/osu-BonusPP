@@ -209,9 +209,9 @@ public class BonusPP{
 		double n = 100;
 		double pp = 0.0D;
 		while(n < 100000){
-			//double val = (3538.12858074605 / Math.log(400651.934228805 * n + 1)) * Math.pow(0.95D, n);//Roan
-			double val = (6373.608451239 / Math.log(3243.69270784438 * n + 1)) * Math.pow(0.95D, n);//WWW
-			//double val = (7874.83653689424 / Math.log(4906.65227561374 * n + 1)) * Math.pow(0.95D, n);//Cookiezi
+			//double val = (3538.12858074605 / Math.log(400651.934228805 * (n + 1) + 1)) * Math.pow(0.95D, n);//Roan
+			double val = (6373.608451239 / Math.log(3243.69270784438 * (n + 1) + 1)) * Math.pow(0.95D, n);//WWW
+			//double val = (7874.83653689424 / Math.log(4906.65227561374 * (n + 1) + 1)) * Math.pow(0.95D, n);//Cookiezi
 			if(val < 0.0D){
 				break;
 			}
