@@ -206,7 +206,7 @@ public class BonusPP{
 		}
 		double[] ys = new double[s.scores.size()];
 		for(int i = 0; i < ys.length; i++){
-			ys[i] = Math.pow(s.scores.get(i).pp * Math.pow(0.95, i), 0.01D);
+			ys[i] = Math.log10(s.scores.get(i).pp * Math.pow(0.95, i)) / Math.log10(100);
 			System.out.println("ys: " + ys[i]);
 		}
 		double[] b = calculateLinearRegression(ys);
@@ -217,7 +217,7 @@ public class BonusPP{
 			//double val = (6373.608451239 / Math.log(3243.69270784438 * (n + 1) + 1)) * Math.pow(0.95D, n);//WWW
 			//double val = (7874.83653689424 / Math.log(4906.65227561374 * (n + 1) + 1)) * Math.pow(0.95D, n);//Cookiezi
 			
-			double val = Math.pow(b[0] + b[1] * n, 100.0D);
+			double val = Math.pow(100.0D, b[0] + b[1] * n);
 			System.out.println("P: " + n + " val=" + val);
 			
 			
