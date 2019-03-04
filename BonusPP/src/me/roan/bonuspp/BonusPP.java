@@ -201,18 +201,28 @@ public class BonusPP{
 	 * @return The amount of PP the player has from non-top-100 scores
 	 */
 	private static final strictfp double extraPolatePPRemainder(Scores s){
-		if(s.scores.size() < 2){
+		if(s.scores.size() < 100){
 			return 0.0D;
 		}
-		double[] b = calculateLinearRegression(s);
-		b[1] = 0;
+		double[] ys = new double[s.scores.size()];
+		for(int i = 0; i < ys.length; i++){
+			ys[i] = Math.pow(s.scores.get(i).pp * Math.pow(0.95, i), 0.01D);
+			System.out.println("ys: " + ys[i]);
+		}
+		double[] b = calculateLinearRegression(ys);
 		double n = 100;
 		double pp = 0.0D;
-		while(n < 100000){
+		while(n < 10000){
 			//double val = (3538.12858074605 / Math.log(400651.934228805 * (n + 1) + 1)) * Math.pow(0.95D, n);//Roan
-			double val = (6373.608451239 / Math.log(3243.69270784438 * (n + 1) + 1)) * Math.pow(0.95D, n);//WWW
+			//double val = (6373.608451239 / Math.log(3243.69270784438 * (n + 1) + 1)) * Math.pow(0.95D, n);//WWW
 			//double val = (7874.83653689424 / Math.log(4906.65227561374 * (n + 1) + 1)) * Math.pow(0.95D, n);//Cookiezi
-			if(val < 0.0D){
+			
+			double val = Math.pow(b[0] + b[1] * n, 100.0D);
+			System.out.println("P: " + n + " val=" + val);
+			
+			
+			
+			if(val <= 0.0D){
 				break;
 			}
 			pp += val;
@@ -240,29 +250,29 @@ public class BonusPP{
 	 *         equation of the following form <tt><i>y</i> = <i>b</i>0 + 
 	 *         <i>b</i>1 * <i>x<i></tt> 
 	 */
-	private static final double[] calculateLinearRegression(Scores s){
+	private static final double[] calculateLinearRegression(double[] ys){
 		double sumOxy = 0.0D;
 		double sumOx2 = 0.0D;
 		double avgX = 0.0D;
 		double avgY = 0.0D;
-		for(Score sc : s.scores){
-			avgX++;
-			avgY += sc.pp;
+		for(int i = 1; i <= ys.length; i++){
+			avgX += i;
+			avgY += ys[i - 1];
 		}
-		avgX = ((s.scores.size() * (s.scores.size() + 1)) / 2) / s.scores.size();//50.5;//avgX / s.scores.size();
+		avgX /= ys.length;//((s.scores.size() * (s.scores.size() + 1)) / 2) / s.scores.size();//50.5;//avgX / s.scores.size();
 		System.out.println(avgX);
-		avgY = avgY / s.scores.size();
-		double n = 1;
-		for(Score sc : s.scores){
-			sumOxy += (n - avgX) * (sc.pp - avgY);
+		avgY /= ys.length;
+		for(int n = 1; n <= ys.length; n++){
+			sumOxy += (n - avgX) * (ys[n - 1] - avgY);
 			sumOx2 += Math.pow(n - avgX, 2.0D);
-			n++;
 		}
-		double Oxy = sumOxy / s.scores.size();
-		double Ox2 = sumOx2 / s.scores.size();
+		System.out.println(sumOxy + " | " + sumOx2);
+		double Oxy = sumOxy / ys.length;
+		double Ox2 = sumOx2 / ys.length;
+		System.out.println(Oxy + " | " + Ox2);
 		return linreg = new double[]{avgY - (Oxy / Ox2) * avgX, Oxy / Ox2};
 	}
-	private static double[] linreg;
+	private static double[] linreg;//TODO remove
 	/**
 	 * Custom JPanel to draw graphs on
 	 * @author Roan
