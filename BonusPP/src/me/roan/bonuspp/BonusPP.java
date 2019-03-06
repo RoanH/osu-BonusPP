@@ -255,20 +255,22 @@ public class BonusPP{
 		double sumOx2 = 0.0D;
 		double avgX = 0.0D;
 		double avgY = 0.0D;
-		for(int i = 1; i <= ys.length; i++){
-			avgX += i;
-			avgY += ys[i - 1];
-		}
-		avgX /= ys.length;//((s.scores.size() * (s.scores.size() + 1)) / 2) / s.scores.size();//50.5;//avgX / s.scores.size();
-		System.out.println(avgX);
-		avgY /= ys.length;
+		double sumX = 0.0D;
 		for(int n = 1; n <= ys.length; n++){
-			sumOxy += (n - avgX) * (ys[n - 1] - avgY);
-			sumOx2 += Math.pow(n - avgX, 2.0D);
+			sumX += Math.log1p(n);
+			avgX += n * Math.log1p(n);
+			avgY += ys[n - 1] * Math.log1p(n);
+		}
+		avgX /= sumX;///= ys.length;//((s.scores.size() * (s.scores.size() + 1)) / 2) / s.scores.size();//50.5;//avgX / s.scores.size();
+		System.out.println(avgX);
+		avgY /= sumX;//sumX;
+		for(int n = 1; n <= ys.length; n++){
+			sumOxy += (n - avgX) * (ys[n - 1] - avgY) * Math.log1p(n);
+			sumOx2 += Math.pow(n - avgX, 2.0D) * Math.log1p(n);
 		}
 		System.out.println(sumOxy + " | " + sumOx2);
-		double Oxy = sumOxy / ys.length;
-		double Ox2 = sumOx2 / ys.length;
+		double Oxy = sumOxy / sumX;
+		double Ox2 = sumOx2 / sumX;
 		System.out.println(Oxy + " | " + Ox2);
 		return linreg = new double[]{avgY - (Oxy / Ox2) * avgX, Oxy / Ox2};
 	}
