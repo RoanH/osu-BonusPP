@@ -146,8 +146,14 @@ public class BonusPP{
 		JPanel msg = new JPanel(new GridLayout(4, 2, 10, 0));
 		msg.setBorder(BorderFactory.createTitledBorder(border, "<html><b>" + USER + "</b> (" + modes.getSelectedItem() + ")</html>"));
 
+		boolean max = (user.count_rank_a + user.count_rank_s + user.count_rank_sh + user.count_rank_ss + user.count_rank_ssh) >= 25397 || bonuspp >= 416.6667;
+
 		msg.add(new JLabel("<html><b>Bonus PP:</b></html>"));
-		msg.add(new JLabel(String.valueOf((int)Math.round(bonuspp))));
+		if(max){
+			msg.add(new JLabel("416.6667 (max, predicted: " + String.valueOf((int)Math.round(bonuspp)) + ")"));
+		}else{
+			msg.add(new JLabel(String.valueOf((int)Math.round(bonuspp))));
+		}
 
 		msg.add(new JLabel("<html><b>Total PP:</b></html>"));
 		msg.add(new JLabel(String.valueOf((int)Math.round(totalpp))));
@@ -156,8 +162,7 @@ public class BonusPP{
 		msg.add(new JLabel(String.valueOf((int)Math.round(scorepp))));
 
 		msg.add(new JLabel("<html><b>Number of ranked scores:</b></html>"));
-		int ns = ((int)Math.round(Math.log10(-(bonuspp / 416.6667D) + 1.0D) / Math.log10(0.9994D)));
-		msg.add(new JLabel(String.valueOf((ns == 0 && bonuspp > 0.0D) ? "25397+" : String.valueOf(ns))));
+		msg.add(new JLabel(String.valueOf(max ? "25397+" : String.valueOf((int)Math.round(Math.log10(-(bonuspp / 416.6667D) + 1.0D) / Math.log10(0.9994D))))));
 
 		JPanel graph = new Graph(scores);
 		JPanel graphpanel = new JPanel(new BorderLayout());
