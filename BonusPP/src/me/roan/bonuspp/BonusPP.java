@@ -142,16 +142,16 @@ public class BonusPP{
 		msg.setBorder(BorderFactory.createTitledBorder(border, "<html><b>" + USER + "</b> (" + modes.getSelectedItem() + ")</html>"));
 
 		msg.add(new JLabel("<html><b>Bonus PP:</b></html>"));
-		msg.add(new JLabel(String.valueOf((int)bonuspp)));
+		msg.add(new JLabel(String.valueOf((int)Math.round(bonuspp))));
 
 		msg.add(new JLabel("<html><b>Total PP:</b></html>"));
-		msg.add(new JLabel(String.valueOf((int)totalpp)));
+		msg.add(new JLabel(String.valueOf((int)Math.round(totalpp))));
 
 		msg.add(new JLabel("<html><b>Total PP (without bonus):</b></html>"));
-		msg.add(new JLabel(String.valueOf((int)scorepp)));
+		msg.add(new JLabel(String.valueOf((int)Math.round(scorepp))));
 
 		msg.add(new JLabel("<html><b>Number of ranked scores:</b></html>"));
-		int ns = ((int)(Math.log10(-(bonuspp / 416.6667D) + 1.0D) / Math.log10(0.9994D)));
+		int ns = ((int)Math.round(Math.log10(-(bonuspp / 416.6667D) + 1.0D) / Math.log10(0.9994D)));
 		msg.add(new JLabel(String.valueOf((ns == 0 && bonuspp > 0.0D) ? "25397+" : String.valueOf(ns))));
 
 		JPanel graph = new Graph(scores);
@@ -191,7 +191,6 @@ public class BonusPP{
 		for(int i = 0; i < scores.length; i++){
 			scorepp += scores[i].pp * Math.pow(0.95D, i);
 		}
-		System.out.println("Score: " + scorepp);
 		return scorepp + extraPolatePPRemainder(scores, user);
 	}
 
