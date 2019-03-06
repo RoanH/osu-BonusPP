@@ -125,8 +125,14 @@ public class BonusPP{
 		}
 		
 		//for(int i = 0; i < 10; i++){s.scores.remove(0);}
-		double scorepp = calculateScorePP(s);
 		double totalpp = gson.fromJson(user, User.class).pp_raw;
+		if(totalpp == 0.0D){//TODO not at all played and not played recently enough
+			JOptionPane optionPane = new JOptionPane("The requested user has not played " + modes.getSelectedItem() + " for a while (or not at all).\nBecause of this their total pp score appears as 0 which ", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"OK"}, 0);
+			JDialog dialog = optionPane.createDialog("Bonus PP");
+			dialog.setIconImage(icon);
+			dialog.setVisible(true);
+		}
+		double scorepp = calculateScorePP(s);
 		double bonuspp = totalpp - scorepp;
 		System.out.println("Bonus: " + bonuspp);
 		int i = 1;
@@ -272,9 +278,9 @@ public class BonusPP{
 		double Oxy = sumOxy / sumX;
 		double Ox2 = sumOx2 / sumX;
 		System.out.println(Oxy + " | " + Ox2);
-		return linreg = new double[]{avgY - (Oxy / Ox2) * avgX, Oxy / Ox2};
+		return new double[]{avgY - (Oxy / Ox2) * avgX, Oxy / Ox2};
 	}
-	private static double[] linreg;//TODO remove
+
 	/**
 	 * Custom JPanel to draw graphs on
 	 * @author Roan
@@ -326,8 +332,7 @@ public class BonusPP{
 				g.setColor(Color.GREEN);
 				g.fillOval((int)(i * dx), (int)(h - (dy * ((scores.scores.get(i).pp * Math.pow(0.95D, i)) + 2))), 2, 2);
 			}
-			System.out.println(linreg[0] + " + " + linreg[1] + "*x");
-			g.drawLine(0, (int)linreg[0], this.getWidth(), (int)(linreg[0] + linreg[1] * 100));
+
 			g.setColor(Color.BLUE);
 			g.drawString("Raw PP", (int)((scores.scores.size() / 2.0D) * dx), (int)(h - (dy * (scores.scores.get((int)(scores.scores.size() / 2.0D)).pp + 2))) - 2);
 			g.setColor(Color.GREEN.darker());
