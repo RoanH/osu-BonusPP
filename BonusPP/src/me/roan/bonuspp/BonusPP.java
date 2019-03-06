@@ -192,11 +192,11 @@ public class BonusPP{
 	 * Calculates the amount of non-bonus PP
 	 * a player has. This is done by adding 
 	 * together all the scores from the player's
-	 * top 100 and by using linear extrapolation
+	 * top 100 and by using regression
 	 * to account for scores that are not part of
-	 * the top 100. (Everything is weighted ofcouse)
-	 * @param scores The list of the player's top 100 scores
-	 * @param 
+	 * the top 100. (Everything is weighted of course)
+	 * @param scores A list of the player's top 100 scores
+	 * @param user Data about the player itself
 	 * @return The amount of non-bonus PP this player has
 	 */
 	private static final double calculateScorePP(Score[] scores, User user){
@@ -210,16 +210,18 @@ public class BonusPP{
 	/**
 	 * Calculates the amount of PP a player
 	 * has from non-top-100 scores. Especially 
-	 * for top player is can be a significant amount.
+	 * for a top player this can be a significant amount.
 	 * If the player has less then 100 top scores this
 	 * method returns 0.
-	 * @param scores The list of the player's top scores
+	 * @param scores A list of the player's top scores
+	 * @param user Data about the player itself
 	 * @return The amount of PP the player has from non-top-100 scores
 	 */
 	private static final strictfp double extraPolatePPRemainder(Score[] scores, User user){
 		if(scores.length < 100){
 			return 0.0D;
 		}
+		//Data transformation
 		double[] ys = new double[scores.length];
 		for(int i = 0; i < ys.length; i++){
 			ys[i] = Math.log10(scores[i].pp * Math.pow(0.95, i)) / Math.log10(100);
@@ -237,10 +239,8 @@ public class BonusPP{
 	}
 
 	/**
-	 * Calculates the linear regression equation from
-	 * the player's top 100 scores. This equation is used
-	 * to extrapolate the player's scores so that non-top-100
-	 * scores can be accounted for.<br><br>
+	 * Computes a weighted linear regression equation from
+	 * the given data set.
 	 * <pre>
 	 * The following formulas are used:
 	 * B1 = Ox,y / Ox^2
@@ -248,7 +248,7 @@ public class BonusPP{
 	 * Ox,y = (1/N) * 'sigma(N,i=1)'((Xi - Ux)(Yi - Uy))
 	 * Ox^2 = (1/N) * 'sigma(N,i=1)'((Xi - U)^2)
 	 * </pre>
-	 * @param s The player's top 100 scores
+	 * @param ys The data set to make a regression model for
 	 * @return The linear regression equation, or more specific
 	 *         this method returns <tt><i>b</i>0</tt> and <tt><i>
 	 *         b</i>1</tt> these two values can be used to form an
@@ -288,13 +288,13 @@ public class BonusPP{
 		 */
 		private static final long serialVersionUID = -3992422623907422683L;
 		/**
-		 * A list of points for the graph
+		 * An array of points for the graph
 		 */
 		private Score[] scores;
 
 		/**
 		 * Creates a new Graph object with the given points
-		 * @param scores
+		 * @param scores The points for the graph
 		 */
 		private Graph(Score[] scores){
 			this.scores = scores;
@@ -340,9 +340,9 @@ public class BonusPP{
 	/**
 	 * A class that follows the
 	 * same structure as the 
-	 * JSON representatation for
+	 * JSON representation for
 	 * a user returned by the 
-	 * osu!API does
+	 * osu!API
 	 * @author Roan
 	 */
 	public static class User{
@@ -352,13 +352,37 @@ public class BonusPP{
 		 * bonus PP
 		 */
 		private double pp_raw;
+		/**
+		 * Number of SS scores this user has
+		 */
 		private int count_rank_ss;
+		/**
+		 * Number of SSH or XH scores this user has
+		 */
 		private int count_rank_ssh;
+		/**
+		 * Number of S scores this user has
+		 */
 		private int count_rank_s;
+		/**
+		 * Number of SH or X scores this user has
+		 */
 		private int count_rank_sh;
+		/**
+		 * Number of A scores this user has
+		 */
 		private int count_rank_a;
+		/**
+		 * Total playcount for this user
+		 */
 		private int playcount;
 		
+		/**
+		 * Gets the total amount of visible scores for
+		 * this user. This is the sum of the number A,
+		 * S, SS, SH and SSH ranks.
+		 * @return The total number of visible scores for this user
+		 */
 		private int scoreCount(){
 			return count_rank_a + count_rank_s + count_rank_sh + count_rank_ss + count_rank_ssh;
 		}
@@ -367,9 +391,9 @@ public class BonusPP{
 	/**
 	 * A class that follows the
 	 * same structure as the 
-	 * JSON representatation for
+	 * JSON representation for
 	 * a user's score returned by the 
-	 * osu!API does
+	 * osu!API
 	 * @author Roan
 	 */
 	public static class Score{
