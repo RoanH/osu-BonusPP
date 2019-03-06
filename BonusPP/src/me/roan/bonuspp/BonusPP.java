@@ -257,16 +257,16 @@ public class BonusPP{
 		double avgY = 0.0D;
 		double sumX = 0.0D;
 		for(int n = 1; n <= ys.length; n++){
-			sumX += Math.log1p(n);
-			avgX += n * Math.log1p(n);
-			avgY += ys[n - 1] * Math.log1p(n);
+			sumX += Math.log1p(n + 1.0D);
+			avgX += n * Math.log1p(n + 1.0D);
+			avgY += ys[n - 1] * Math.log1p(n + 1.0D);
 		}
 		avgX /= sumX;///= ys.length;//((s.scores.size() * (s.scores.size() + 1)) / 2) / s.scores.size();//50.5;//avgX / s.scores.size();
 		System.out.println(avgX);
 		avgY /= sumX;//sumX;
 		for(int n = 1; n <= ys.length; n++){
-			sumOxy += (n - avgX) * (ys[n - 1] - avgY) * Math.log1p(n);
-			sumOx2 += Math.pow(n - avgX, 2.0D) * Math.log1p(n);
+			sumOxy += (n - avgX) * (ys[n - 1] - avgY) * Math.log1p(n + 1.0D);
+			sumOx2 += Math.pow(n - avgX, 2.0D) * Math.log1p(n + 1.0D);
 		}
 		System.out.println(sumOxy + " | " + sumOx2);
 		double Oxy = sumOxy / sumX;
