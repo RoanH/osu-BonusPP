@@ -15,7 +15,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -31,8 +30,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.Border;
 
 import com.google.gson.Gson;
-
-import me.roan.bonuspp.BonusPP.Scores.Score;
 
 /**
  * A simple program to calculate the 
@@ -137,7 +134,7 @@ public class BonusPP{
 			main(new String[]{APIKEY});
 		}
 		
-		double scorepp = calculateScorePP(scores);
+		double scorepp = calculateScorePP(scores, user);
 		double bonuspp = totalpp - scorepp;
 
 		Border border = BorderFactory.createLineBorder(Color.BLACK);
@@ -186,15 +183,16 @@ public class BonusPP{
 	 * to account for scores that are not part of
 	 * the top 100. (Everything is weighted ofcouse)
 	 * @param scores The list of the player's top 100 scores
+	 * @param 
 	 * @return The amount of non-bonus PP this player has
 	 */
-	private static final double calculateScorePP(Score[] scores){
+	private static final double calculateScorePP(Score[] scores, User user){
 		double scorepp = 0.0D;
 		for(int i = 0; i < scores.length; i++){
 			scorepp += scores[i].pp * Math.pow(0.95D, i);
 		}
 		System.out.println("Score: " + scorepp);
-		return scorepp + extraPolatePPRemainder(scores);
+		return scorepp + extraPolatePPRemainder(scores, user);
 	}
 
 	/**
@@ -206,33 +204,22 @@ public class BonusPP{
 	 * @param scores The list of the player's top scores
 	 * @return The amount of PP the player has from non-top-100 scores
 	 */
-	private static final strictfp double extraPolatePPRemainder(Score[] scores){
+	private static final strictfp double extraPolatePPRemainder(Score[] scores, User user){
 		if(scores.length < 100){
 			return 0.0D;
 		}
 		double[] ys = new double[scores.length];
 		for(int i = 0; i < ys.length; i++){
 			ys[i] = Math.log10(scores[i].pp * Math.pow(0.95, i)) / Math.log10(100);
-			System.out.println("ys: " + ys[i]);
 		}
 		double[] b = calculateLinearRegression(ys);
-		double n = 100;
 		double pp = 0.0D;
-		while(n < 10000){
-			//double val = (3538.12858074605 / Math.log(400651.934228805 * (n + 1) + 1)) * Math.pow(0.95D, n);//Roan
-			//double val = (6373.608451239 / Math.log(3243.69270784438 * (n + 1) + 1)) * Math.pow(0.95D, n);//WWW
-			//double val = (7874.83653689424 / Math.log(4906.65227561374 * (n + 1) + 1)) * Math.pow(0.95D, n);//Cookiezi
-			
+		for(double n = 100; n <= user.playcount; n++){
 			double val = Math.pow(100.0D, b[0] + b[1] * n);
-			System.out.println("P: " + n + " val=" + val);
-			
-			
-			
 			if(val <= 0.0D){
 				break;
 			}
 			pp += val;
-			n++;
 		}
 		return pp;
 	}
@@ -263,21 +250,19 @@ public class BonusPP{
 		double avgY = 0.0D;
 		double sumX = 0.0D;
 		for(int n = 1; n <= ys.length; n++){
-			sumX += Math.log1p(n + 1.0D);
-			avgX += n * Math.log1p(n + 1.0D);
-			avgY += ys[n - 1] * Math.log1p(n + 1.0D);
+			double weight = Math.log1p(n + 1.0D);
+			sumX += weight;
+			avgX += n * weight;
+			avgY += ys[n - 1] * weight;
 		}
-		avgX /= sumX;///= ys.length;//((s.scores.size() * (s.scores.size() + 1)) / 2) / s.scores.size();//50.5;//avgX / s.scores.size();
-		System.out.println(avgX);
-		avgY /= sumX;//sumX;
+		avgX /= sumX;
+		avgY /= sumX;
 		for(int n = 1; n <= ys.length; n++){
 			sumOxy += (n - avgX) * (ys[n - 1] - avgY) * Math.log1p(n + 1.0D);
 			sumOx2 += Math.pow(n - avgX, 2.0D) * Math.log1p(n + 1.0D);
 		}
-		System.out.println(sumOxy + " | " + sumOx2);
 		double Oxy = sumOxy / sumX;
 		double Ox2 = sumOx2 / sumX;
-		System.out.println(Oxy + " | " + Ox2);
 		return new double[]{avgY - (Oxy / Ox2) * avgX, Oxy / Ox2};
 	}
 
@@ -367,31 +352,16 @@ public class BonusPP{
 	 * A class that follows the
 	 * same structure as the 
 	 * JSON representatation for
-	 * a user's scores returned by the 
+	 * a user's score returned by the 
 	 * osu!API does
 	 * @author Roan
 	 */
-	public static class Scores{
+	public static class Score{
 		/**
-		 * The top scores of the user
+		 * The amount of PP this
+		 * score is worth
 		 */
-		private List<Score> scores;
-
-		/**
-		 * A class that follows the
-		 * same structure as the 
-		 * JSON representatation for
-		 * a user's score returned by the 
-		 * osu!API does
-		 * @author Roan
-		 */
-		public static class Score{
-			/**
-			 * The amount of PP this
-			 * score is worth
-			 */
-			private double pp;
-		}
+		private double pp;
 	}
 	
 	/**
