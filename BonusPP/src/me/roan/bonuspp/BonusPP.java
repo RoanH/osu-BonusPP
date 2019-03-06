@@ -27,6 +27,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 
 import com.google.gson.Gson;
@@ -94,6 +95,7 @@ public class BonusPP{
 			JOptionPane optionPane = new JOptionPane(form, JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, 0);
 			JDialog dialog = optionPane.createDialog("Bonus PP");
 			dialog.setIconImage(icon);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 			if(options[1].equals(optionPane.getValue())){
 				System.exit(0);
@@ -108,6 +110,7 @@ public class BonusPP{
 			JOptionPane optionPane = new JOptionPane("No user with the given username exists or the given API key is not valid.", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"OK"}, 0);
 			JDialog dialog = optionPane.createDialog("Bonus PP");
 			dialog.setIconImage(icon);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 			main(new String[]{APIKEY});
 		}
@@ -117,6 +120,7 @@ public class BonusPP{
 			JOptionPane optionPane = new JOptionPane("The requested user has not played the " + modes.getSelectedItem() + " game mode yet.\n(so there is nothing to compute)", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"OK"}, 0);
 			JDialog dialog = optionPane.createDialog("Bonus PP");
 			dialog.setIconImage(icon);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 			main(new String[]{APIKEY});
 		}
@@ -130,6 +134,7 @@ public class BonusPP{
 			JOptionPane optionPane = new JOptionPane("The requested user has not played " + modes.getSelectedItem() + " for a while.\nBecause of this their total pp appears as 0 which means their bonus pp cannot be computed.", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"OK"}, 0);
 			JDialog dialog = optionPane.createDialog("Bonus PP");
 			dialog.setIconImage(icon);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 			main(new String[]{APIKEY});
 		}
@@ -168,9 +173,12 @@ public class BonusPP{
 			JOptionPane optionPane = new JOptionPane(content, JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, 0);
 			JDialog dialog = optionPane.createDialog("Bonus PP");
 			dialog.setIconImage(icon);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 			if(options[1].equals(optionPane.getValue())){
 				main(new String[]{APIKEY});
+			}else{
+				System.exit(0);
 			}
 		}
 	}
