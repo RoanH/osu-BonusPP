@@ -46,7 +46,7 @@ javadoc:
   script:
     - cd ${PROJECTNAME}
     - find src -name "*.java" > sources.txt
-    - javadoc -private @sources.txt
+    - javadoc -cp "./lib/gson-2.3.1.jar:." -private @sources.txt
   stage: javadoc
 
 compile:

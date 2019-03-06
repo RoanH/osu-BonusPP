@@ -15,7 +15,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -28,11 +27,10 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 
 import com.google.gson.Gson;
-
-import me.roan.bonuspp.BonusPP.Scores.Score;
 
 /**
  * A simple program to calculate the 
@@ -43,7 +41,7 @@ public class BonusPP{
 
 	/**
 	 * @param args It's possible to call the program
-	 *        with your osu! API key as command line argument.
+	 *        with your osu! API key as a command line argument.
 	 */
 	public static void main(String[] args){
 		try{
@@ -97,50 +95,76 @@ public class BonusPP{
 			JOptionPane optionPane = new JOptionPane(form, JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, 0);
 			JDialog dialog = optionPane.createDialog("Bonus PP");
 			dialog.setIconImage(icon);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 			if(options[1].equals(optionPane.getValue())){
 				System.exit(0);
 			}
 		}
 
-		String MODE = String.valueOf(modes.getSelectedIndex());
-		String APIKEY = api.getText();
-		String USER = name.getText();
-		String req = getPage("https://osu.ppy.sh/api/get_user?k=" + APIKEY + "&u=" + USER + "&type=string&m=" + MODE);
-		if(req == null){
+		final String MODE = String.valueOf(modes.getSelectedIndex());
+		final String APIKEY = api.getText();
+		final String USER = name.getText();
+		String userData = getPage("https://osu.ppy.sh/api/get_user?k=" + APIKEY + "&u=" + USER + "&type=string&m=" + MODE);
+		if(userData == null){
 			JOptionPane optionPane = new JOptionPane("No user with the given username exists or the given API key is not valid.", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"OK"}, 0);
 			JDialog dialog = optionPane.createDialog("Bonus PP");
 			dialog.setIconImage(icon);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 			main(new String[]{APIKEY});
 		}
-		String user = req.substring(1, req.length() - 1).split(",\"events\"")[0] + "}";
-		String best = "{scores:" + getPage("https://osu.ppy.sh/api/get_user_best?k=" + APIKEY + "&u=" + USER + "&limit=100&type=string&m=" + MODE) + "}";
 
+		String best = getPage("https://osu.ppy.sh/api/get_user_best?k=" + APIKEY + "&u=" + USER + "&limit=100&type=string&m=" + MODE);
+		if(best == null){
+			JOptionPane optionPane = new JOptionPane("The requested user has not played the " + modes.getSelectedItem() + " game mode yet.\n(so there is nothing to compute)", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"OK"}, 0);
+			JDialog dialog = optionPane.createDialog("Bonus PP");
+			dialog.setIconImage(icon);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+			dialog.setVisible(true);
+			main(new String[]{APIKEY});
+		}
+		
 		Gson gson = new Gson();
-		Scores s = gson.fromJson(best, Scores.class);
-		double scorepp = calculateScorePP(s);
-		double totalpp = gson.fromJson(user, User.class).pp_raw;
+		Score[] scores = gson.fromJson(best, Score[].class);
+		User user = gson.fromJson(userData, User[].class)[0];
+		
+		double totalpp = user.pp_raw;
+		if(totalpp == 0.0D){
+			JOptionPane optionPane = new JOptionPane("The requested user has not played " + modes.getSelectedItem() + " for a while.\nBecause of this their total pp appears as 0 which means their bonus pp cannot be computed.", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"OK"}, 0);
+			JDialog dialog = optionPane.createDialog("Bonus PP");
+			dialog.setIconImage(icon);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+			dialog.setVisible(true);
+			main(new String[]{APIKEY});
+		}
+		
+		double scorepp = calculateScorePP(scores, user);
 		double bonuspp = totalpp - scorepp;
 
 		Border border = BorderFactory.createLineBorder(Color.BLACK);
 		JPanel msg = new JPanel(new GridLayout(4, 2, 10, 0));
 		msg.setBorder(BorderFactory.createTitledBorder(border, "<html><b>" + USER + "</b> (" + modes.getSelectedItem() + ")</html>"));
 
+		boolean max = user.scoreCount() >= 25397 || bonuspp >= 416.6667;
+
 		msg.add(new JLabel("<html><b>Bonus PP:</b></html>"));
-		msg.add(new JLabel(String.valueOf((int)bonuspp)));
+		if(max){
+			msg.add(new JLabel("416.6667 (max, predicted: " + String.valueOf((int)Math.round(bonuspp)) + ")"));
+		}else{
+			msg.add(new JLabel(String.valueOf((int)Math.round(bonuspp))));
+		}
 
 		msg.add(new JLabel("<html><b>Total PP:</b></html>"));
-		msg.add(new JLabel(String.valueOf((int)totalpp)));
+		msg.add(new JLabel(String.valueOf((int)Math.round(totalpp))));
 
 		msg.add(new JLabel("<html><b>Total PP (without bonus):</b></html>"));
-		msg.add(new JLabel(String.valueOf((int)scorepp)));
+		msg.add(new JLabel(String.valueOf((int)Math.round(scorepp))));
 
 		msg.add(new JLabel("<html><b>Number of ranked scores:</b></html>"));
-		int ns = ((int)(Math.log10(-(bonuspp / 416.6667D) + 1.0D) / Math.log10(0.9994D)));
-		msg.add(new JLabel(String.valueOf((ns == 0 && bonuspp > 0.0D) ? "25397+" : String.valueOf(ns))));
+		msg.add(new JLabel(String.valueOf(max ? (Math.max(user.scoreCount(), 25397) + "+") : String.valueOf((int)Math.round(Math.log10(-(bonuspp / 416.6667D) + 1.0D) / Math.log10(0.9994D))))));
 
-		JPanel graph = new Graph(s);
+		JPanel graph = new Graph(scores);
 		JPanel graphpanel = new JPanel(new BorderLayout());
 		graphpanel.add(graph, BorderLayout.CENTER);
 		graphpanel.setBorder(BorderFactory.createTitledBorder(border, "PP score graph"));
@@ -154,9 +178,12 @@ public class BonusPP{
 			JOptionPane optionPane = new JOptionPane(content, JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, 0);
 			JDialog dialog = optionPane.createDialog("Bonus PP");
 			dialog.setIconImage(icon);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 			if(options[1].equals(optionPane.getValue())){
 				main(new String[]{APIKEY});
+			}else{
+				System.exit(0);
 			}
 		}
 	}
@@ -165,52 +192,55 @@ public class BonusPP{
 	 * Calculates the amount of non-bonus PP
 	 * a player has. This is done by adding 
 	 * together all the scores from the player's
-	 * top 100 and by using linear extrapolation
+	 * top 100 and by using regression
 	 * to account for scores that are not part of
-	 * the top 100. (Everything is weighted ofcouse)
-	 * @param s The list of the player's top 100 scores
+	 * the top 100. (Everything is weighted of course)
+	 * @param scores A list of the player's top 100 scores
+	 * @param user Data about the player itself
 	 * @return The amount of non-bonus PP this player has
 	 */
-	private static final double calculateScorePP(Scores s){
+	private static final double calculateScorePP(Score[] scores, User user){
 		double scorepp = 0.0D;
-		for(int i = 0; i < s.scores.size(); i++){
-			scorepp += s.scores.get(i).pp * Math.pow(0.95D, i);
+		for(int i = 0; i < scores.length; i++){
+			scorepp += scores[i].pp * Math.pow(0.95D, i);
 		}
-		return scorepp + extraPolatePPRemainder(s);
+		return scorepp + extraPolatePPRemainder(scores, user);
 	}
 
 	/**
 	 * Calculates the amount of PP a player
 	 * has from non-top-100 scores. Especially 
-	 * for top player is can be a significant amount.
+	 * for a top player this can be a significant amount.
 	 * If the player has less then 100 top scores this
 	 * method returns 0.
-	 * @param s The list of the player's top scores
+	 * @param scores A list of the player's top scores
+	 * @param user Data about the player itself
 	 * @return The amount of PP the player has from non-top-100 scores
 	 */
-	private static final strictfp double extraPolatePPRemainder(Scores s){
-		if(s.scores.size() < 100){
+	private static final strictfp double extraPolatePPRemainder(Score[] scores, User user){
+		if(scores.length < 100){
 			return 0.0D;
 		}
-		double[] b = calculateLinearRegression(s);
-		double n = s.scores.size() + 1;
+		//Data transformation
+		double[] ys = new double[scores.length];
+		for(int i = 0; i < ys.length; i++){
+			ys[i] = Math.log10(scores[i].pp * Math.pow(0.95, i)) / Math.log10(100);
+		}
+		double[] b = calculateLinearRegression(ys);
 		double pp = 0.0D;
-		while(true){
-			double val = (b[0] + b[1] * n) * Math.pow(0.95D, n);
-			if(val < 0.0D){
+		for(double n = 100; n <= user.playcount; n++){
+			double val = Math.pow(100.0D, b[0] + b[1] * n);
+			if(val <= 0.0D){
 				break;
 			}
 			pp += val;
-			n++;
 		}
 		return pp;
 	}
 
 	/**
-	 * Calculates the linear regression equation from
-	 * the player's top 100 scores. This equation is used
-	 * to extrapolate the player's scores so that non-top-100
-	 * scores can be accounted for.<br><br>
+	 * Computes a weighted linear regression equation from
+	 * the given data set.
 	 * <pre>
 	 * The following formulas are used:
 	 * B1 = Ox,y / Ox^2
@@ -218,32 +248,33 @@ public class BonusPP{
 	 * Ox,y = (1/N) * 'sigma(N,i=1)'((Xi - Ux)(Yi - Uy))
 	 * Ox^2 = (1/N) * 'sigma(N,i=1)'((Xi - U)^2)
 	 * </pre>
-	 * @param s The player's top 100 scores
+	 * @param ys The data set to make a regression model for
 	 * @return The linear regression equation, or more specific
 	 *         this method returns <tt><i>b</i>0</tt> and <tt><i>
 	 *         b</i>1</tt> these two values can be used to form an
 	 *         equation of the following form <tt><i>y</i> = <i>b</i>0 + 
 	 *         <i>b</i>1 * <i>x<i></tt> 
 	 */
-	private static final double[] calculateLinearRegression(Scores s){
+	private static final double[] calculateLinearRegression(double[] ys){
 		double sumOxy = 0.0D;
 		double sumOx2 = 0.0D;
 		double avgX = 0.0D;
 		double avgY = 0.0D;
-		for(Score sc : s.scores){
-			avgX++;
-			avgY += sc.pp;
+		double sumX = 0.0D;
+		for(int n = 1; n <= ys.length; n++){
+			double weight = Math.log1p(n + 1.0D);
+			sumX += weight;
+			avgX += n * weight;
+			avgY += ys[n - 1] * weight;
 		}
-		avgX = avgX / s.scores.size();
-		avgY = avgY / s.scores.size();
-		double n = 0;
-		for(Score sc : s.scores){
-			sumOxy += (n - avgX) * (sc.pp - avgY);
-			sumOx2 += Math.pow(n - avgX, 2.0D);
-			n++;
+		avgX /= sumX;
+		avgY /= sumX;
+		for(int n = 1; n <= ys.length; n++){
+			sumOxy += (n - avgX) * (ys[n - 1] - avgY) * Math.log1p(n + 1.0D);
+			sumOx2 += Math.pow(n - avgX, 2.0D) * Math.log1p(n + 1.0D);
 		}
-		double Oxy = sumOxy / s.scores.size();
-		double Ox2 = sumOx2 / s.scores.size();
+		double Oxy = sumOxy / sumX;
+		double Ox2 = sumOx2 / sumX;
 		return new double[]{avgY - (Oxy / Ox2) * avgX, Oxy / Ox2};
 	}
 
@@ -257,16 +288,16 @@ public class BonusPP{
 		 */
 		private static final long serialVersionUID = -3992422623907422683L;
 		/**
-		 * A list of points for the graph
+		 * An array of points for the graph
 		 */
-		private Scores scores;
+		private Score[] scores;
 
 		/**
 		 * Creates a new Graph object with the given points
-		 * @param s
+		 * @param scores The points for the graph
 		 */
-		private Graph(Scores s){
-			scores = s;
+		private Graph(Score[] scores){
+			this.scores = scores;
 		}
 
 		/**
@@ -287,30 +318,31 @@ public class BonusPP{
 		public void paintComponent(Graphics g){
 			double w = this.getWidth();
 			double h = this.getHeight();
-			double maxpp = scores.scores.get(0).pp;
+			double maxpp = scores[0].pp;
 
-			double dx = w / scores.scores.size();
+			double dx = w / scores.length;
 			double dy = h / (maxpp + 2);
 
-			for(int i = 0; i < scores.scores.size(); i++){
+			for(int i = 0; i < scores.length; i++){
 				g.setColor(Color.BLUE);
-				g.fillOval((int)(i * dx), (int)(h - (dy * (scores.scores.get(i).pp + 2))), 2, 2);
+				g.fillOval((int)(i * dx), (int)(h - (dy * (scores[i].pp + 2))), 2, 2);
 				g.setColor(Color.GREEN);
-				g.fillOval((int)(i * dx), (int)(h - (dy * ((scores.scores.get(i).pp * Math.pow(0.95D, i)) + 2))), 2, 2);
+				g.fillOval((int)(i * dx), (int)(h - (dy * ((scores[i].pp * Math.pow(0.95D, i)) + 2))), 2, 2);
 			}
+
 			g.setColor(Color.BLUE);
-			g.drawString("Raw PP", (int)((scores.scores.size() / 2.0D) * dx), (int)(h - (dy * (scores.scores.get((int)(scores.scores.size() / 2.0D)).pp + 2))) - 2);
+			g.drawString("Raw PP", (int)((scores.length / 2.0D) * dx), (int)(h - (dy * (scores[(int)(scores.length / 2.0D)].pp + 2))) - 2);
 			g.setColor(Color.GREEN.darker());
-			g.drawString("Weighted PP", (int)((scores.scores.size() / 2.0D) * dx), (int)(h - (dy * ((scores.scores.get((int)(scores.scores.size() / 2.0D)).pp * Math.pow(0.95D, (scores.scores.size() / 2.0D))) + 2))) - 2);
+			g.drawString("Weighted PP", (int)((scores.length / 2.0D) * dx), (int)(h - (dy * ((scores[(int)(scores.length / 2.0D)].pp * Math.pow(0.95D, (scores.length / 2.0D))) + 2))) - 2);
 		}
 	}
 
 	/**
 	 * A class that follows the
 	 * same structure as the 
-	 * JSON representatation for
+	 * JSON representation for
 	 * a user returned by the 
-	 * osu!API does
+	 * osu!API
 	 * @author Roan
 	 */
 	public static class User{
@@ -319,38 +351,57 @@ public class BonusPP{
 		 * PP this user has, so this includes
 		 * bonus PP
 		 */
-		double pp_raw;
+		private double pp_raw;
+		/**
+		 * Number of SS scores this user has
+		 */
+		private int count_rank_ss;
+		/**
+		 * Number of SSH or XH scores this user has
+		 */
+		private int count_rank_ssh;
+		/**
+		 * Number of S scores this user has
+		 */
+		private int count_rank_s;
+		/**
+		 * Number of SH or X scores this user has
+		 */
+		private int count_rank_sh;
+		/**
+		 * Number of A scores this user has
+		 */
+		private int count_rank_a;
+		/**
+		 * Total playcount for this user
+		 */
+		private int playcount;
+		
+		/**
+		 * Gets the total amount of visible scores for
+		 * this user. This is the sum of the number A,
+		 * S, SS, SH and SSH ranks.
+		 * @return The total number of visible scores for this user
+		 */
+		private int scoreCount(){
+			return count_rank_a + count_rank_s + count_rank_sh + count_rank_ss + count_rank_ssh;
+		}
 	}
 
 	/**
 	 * A class that follows the
 	 * same structure as the 
-	 * JSON representatation for
-	 * a user's scores returned by the 
-	 * osu!API does
+	 * JSON representation for
+	 * a user's score returned by the 
+	 * osu!API
 	 * @author Roan
 	 */
-	public static class Scores{
+	public static class Score{
 		/**
-		 * The top scores of the user
+		 * The amount of PP this
+		 * score is worth
 		 */
-		List<Score> scores;
-
-		/**
-		 * A class that follows the
-		 * same structure as the 
-		 * JSON representatation for
-		 * a user's score returned by the 
-		 * osu!API does
-		 * @author Roan
-		 */
-		public static class Score{
-			/**
-			 * The amount of PP this
-			 * score is worth
-			 */
-			double pp;
-		}
+		private double pp;
 	}
 	
 	/**
