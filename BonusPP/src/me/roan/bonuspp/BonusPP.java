@@ -146,7 +146,7 @@ public class BonusPP{
 		JPanel msg = new JPanel(new GridLayout(4, 2, 10, 0));
 		msg.setBorder(BorderFactory.createTitledBorder(border, "<html><b>" + USER + "</b> (" + modes.getSelectedItem() + ")</html>"));
 
-		boolean max = (user.count_rank_a + user.count_rank_s + user.count_rank_sh + user.count_rank_ss + user.count_rank_ssh) >= 25397 || bonuspp >= 416.6667;
+		boolean max = user.scoreCount() >= 25397 || bonuspp >= 416.6667;
 
 		msg.add(new JLabel("<html><b>Bonus PP:</b></html>"));
 		if(max){
@@ -162,7 +162,7 @@ public class BonusPP{
 		msg.add(new JLabel(String.valueOf((int)Math.round(scorepp))));
 
 		msg.add(new JLabel("<html><b>Number of ranked scores:</b></html>"));
-		msg.add(new JLabel(String.valueOf(max ? "25397+" : String.valueOf((int)Math.round(Math.log10(-(bonuspp / 416.6667D) + 1.0D) / Math.log10(0.9994D))))));
+		msg.add(new JLabel(String.valueOf(max ? (Math.max(user.scoreCount(), 25397) + "+") : String.valueOf((int)Math.round(Math.log10(-(bonuspp / 416.6667D) + 1.0D) / Math.log10(0.9994D))))));
 
 		JPanel graph = new Graph(scores);
 		JPanel graphpanel = new JPanel(new BorderLayout());
@@ -358,6 +358,10 @@ public class BonusPP{
 		private int count_rank_sh;
 		private int count_rank_a;
 		private int playcount;
+		
+		private int scoreCount(){
+			return count_rank_a + count_rank_s + count_rank_sh + count_rank_ss + count_rank_ssh;
+		}
 	}
 
 	/**
