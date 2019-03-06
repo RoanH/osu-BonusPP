@@ -256,19 +256,18 @@ public class BonusPP{
 		double avgX = 0.0D;
 		double avgY = 0.0D;
 		for(int i = 1; i <= ys.length; i++){
-			avgX += i;
-			avgY += ys[i - 1];
+			avgY += ys[i - 1] * i;
 		}
-		avgX /= ys.length;//((s.scores.size() * (s.scores.size() + 1)) / 2) / s.scores.size();//50.5;//avgX / s.scores.size();
+		avgX = 67.0D;///= ys.length;//((s.scores.size() * (s.scores.size() + 1)) / 2) / s.scores.size();//50.5;//avgX / s.scores.size();
 		System.out.println(avgX);
-		avgY /= ys.length;
+		avgY /= 5050;//sumX;
 		for(int n = 1; n <= ys.length; n++){
-			sumOxy += (n - avgX) * (ys[n - 1] - avgY);
-			sumOx2 += Math.pow(n - avgX, 2.0D);
+			sumOxy += (n - avgX) * (ys[n - 1] - avgY) * n;
+			sumOx2 += Math.pow(n - avgX, 2.0D) * n;
 		}
 		System.out.println(sumOxy + " | " + sumOx2);
-		double Oxy = sumOxy / ys.length;
-		double Ox2 = sumOx2 / ys.length;
+		double Oxy = sumOxy / 5050;
+		double Ox2 = sumOx2 / 5050;
 		System.out.println(Oxy + " | " + Ox2);
 		return linreg = new double[]{avgY - (Oxy / Ox2) * avgX, Oxy / Ox2};
 	}
