@@ -43,7 +43,7 @@ public class BonusPP{
 
 	/**
 	 * @param args It's possible to call the program
-	 *        with your osu! API key as command line argument.
+	 *        with your osu! API key as a command line argument.
 	 */
 	public static void main(String[] args){
 		try{
@@ -103,36 +103,42 @@ public class BonusPP{
 			}
 		}
 
-		String MODE = String.valueOf(modes.getSelectedIndex());
-		String APIKEY = api.getText();
-		String USER = name.getText();
-		String req = getPage("https://osu.ppy.sh/api/get_user?k=" + APIKEY + "&u=" + USER + "&type=string&m=" + MODE);
-		if(req == null){
+		final String MODE = String.valueOf(modes.getSelectedIndex());
+		final String APIKEY = api.getText();
+		final String USER = name.getText();
+		String userData = getPage("https://osu.ppy.sh/api/get_user?k=" + APIKEY + "&u=" + USER + "&type=string&m=" + MODE);
+		if(userData == null){
 			JOptionPane optionPane = new JOptionPane("No user with the given username exists or the given API key is not valid.", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"OK"}, 0);
 			JDialog dialog = optionPane.createDialog("Bonus PP");
 			dialog.setIconImage(icon);
 			dialog.setVisible(true);
 			main(new String[]{APIKEY});
 		}
-		String user = req.substring(1, req.length() - 1).split(",\"events\"")[0] + "}";
-		String best = "{scores:" + getPage("https://osu.ppy.sh/api/get_user_best?k=" + APIKEY + "&u=" + USER + "&limit=100&type=string&m=" + MODE) + "}";
+
+		String best = getPage("https://osu.ppy.sh/api/get_user_best?k=" + APIKEY + "&u=" + USER + "&limit=100&type=string&m=" + MODE);
+		if(best == null){
+			JOptionPane optionPane = new JOptionPane("The requested user has not played the " + modes.getSelectedItem() + " game mode yet.\n(so there is nothing to compute)", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"OK"}, 0);
+			JDialog dialog = optionPane.createDialog("Bonus PP");
+			dialog.setIconImage(icon);
+			dialog.setVisible(true);
+			main(new String[]{APIKEY});
+		}
 		
 		Gson gson = new Gson();
-		Scores s = gson.fromJson(best, Scores.class);
+		Score[] scores = gson.fromJson(best, Score[].class);
+		User user = gson.fromJson(userData, User[].class)[0];
 		
-		for(Score st : s.scores){
-			System.out.println(st.pp);
+		double totalpp = user.pp_raw;
+		if(totalpp == 0.0D){
+			JOptionPane optionPane = new JOptionPane("The requested user has not played " + modes.getSelectedItem() + " for a while.\nBecause of this their total pp appears as 0 which means their bonus pp cannot be computed.", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"OK"}, 0);
+			JDialog dialog = optionPane.createDialog("Bonus PP");
+			dialog.setIconImage(icon);
+			dialog.setVisible(true);
+			main(new String[]{APIKEY});
 		}
 		
-		//for(int i = 0; i < 10; i++){s.scores.remove(0);}
-		double scorepp = calculateScorePP(s);
-		double totalpp = gson.fromJson(user, User.class).pp_raw;
+		double scorepp = calculateScorePP(scores);
 		double bonuspp = totalpp - scorepp;
-		System.out.println("Bonus: " + bonuspp);
-		int i = 1;
-		for(Score st : s.scores){
-			System.out.println(st.pp);
-		}
 
 		Border border = BorderFactory.createLineBorder(Color.BLACK);
 		JPanel msg = new JPanel(new GridLayout(4, 2, 10, 0));
@@ -151,7 +157,7 @@ public class BonusPP{
 		int ns = ((int)(Math.log10(-(bonuspp / 416.6667D) + 1.0D) / Math.log10(0.9994D)));
 		msg.add(new JLabel(String.valueOf((ns == 0 && bonuspp > 0.0D) ? "25397+" : String.valueOf(ns))));
 
-		JPanel graph = new Graph(s);
+		JPanel graph = new Graph(scores);
 		JPanel graphpanel = new JPanel(new BorderLayout());
 		graphpanel.add(graph, BorderLayout.CENTER);
 		graphpanel.setBorder(BorderFactory.createTitledBorder(border, "PP score graph"));
@@ -179,16 +185,16 @@ public class BonusPP{
 	 * top 100 and by using linear extrapolation
 	 * to account for scores that are not part of
 	 * the top 100. (Everything is weighted ofcouse)
-	 * @param s The list of the player's top 100 scores
+	 * @param scores The list of the player's top 100 scores
 	 * @return The amount of non-bonus PP this player has
 	 */
-	private static final double calculateScorePP(Scores s){
+	private static final double calculateScorePP(Score[] scores){
 		double scorepp = 0.0D;
-		for(int i = 0; i < s.scores.size(); i++){
-			scorepp += s.scores.get(i).pp * Math.pow(0.95D, i);
+		for(int i = 0; i < scores.length; i++){
+			scorepp += scores[i].pp * Math.pow(0.95D, i);
 		}
 		System.out.println("Score: " + scorepp);
-		return scorepp + extraPolatePPRemainder(s);
+		return scorepp + extraPolatePPRemainder(scores);
 	}
 
 	/**
@@ -197,16 +203,16 @@ public class BonusPP{
 	 * for top player is can be a significant amount.
 	 * If the player has less then 100 top scores this
 	 * method returns 0.
-	 * @param s The list of the player's top scores
+	 * @param scores The list of the player's top scores
 	 * @return The amount of PP the player has from non-top-100 scores
 	 */
-	private static final strictfp double extraPolatePPRemainder(Scores s){
-		if(s.scores.size() < 100){
+	private static final strictfp double extraPolatePPRemainder(Score[] scores){
+		if(scores.length < 100){
 			return 0.0D;
 		}
-		double[] ys = new double[s.scores.size()];
+		double[] ys = new double[scores.length];
 		for(int i = 0; i < ys.length; i++){
-			ys[i] = Math.log10(s.scores.get(i).pp * Math.pow(0.95, i)) / Math.log10(100);
+			ys[i] = Math.log10(scores[i].pp * Math.pow(0.95, i)) / Math.log10(100);
 			System.out.println("ys: " + ys[i]);
 		}
 		double[] b = calculateLinearRegression(ys);
@@ -272,9 +278,9 @@ public class BonusPP{
 		double Oxy = sumOxy / sumX;
 		double Ox2 = sumOx2 / sumX;
 		System.out.println(Oxy + " | " + Ox2);
-		return linreg = new double[]{avgY - (Oxy / Ox2) * avgX, Oxy / Ox2};
+		return new double[]{avgY - (Oxy / Ox2) * avgX, Oxy / Ox2};
 	}
-	private static double[] linreg;//TODO remove
+
 	/**
 	 * Custom JPanel to draw graphs on
 	 * @author Roan
@@ -287,14 +293,14 @@ public class BonusPP{
 		/**
 		 * A list of points for the graph
 		 */
-		private Scores scores;
+		private Score[] scores;
 
 		/**
 		 * Creates a new Graph object with the given points
-		 * @param s
+		 * @param scores
 		 */
-		private Graph(Scores s){
-			scores = s;
+		private Graph(Score[] scores){
+			this.scores = scores;
 		}
 
 		/**
@@ -315,23 +321,22 @@ public class BonusPP{
 		public void paintComponent(Graphics g){
 			double w = this.getWidth();
 			double h = this.getHeight();
-			double maxpp = scores.scores.get(0).pp;
+			double maxpp = scores[0].pp;
 
-			double dx = w / scores.scores.size();
+			double dx = w / scores.length;
 			double dy = h / (maxpp + 2);
 
-			for(int i = 0; i < scores.scores.size(); i++){
+			for(int i = 0; i < scores.length; i++){
 				g.setColor(Color.BLUE);
-				g.fillOval((int)(i * dx), (int)(h - (dy * (scores.scores.get(i).pp + 2))), 2, 2);
+				g.fillOval((int)(i * dx), (int)(h - (dy * (scores[i].pp + 2))), 2, 2);
 				g.setColor(Color.GREEN);
-				g.fillOval((int)(i * dx), (int)(h - (dy * ((scores.scores.get(i).pp * Math.pow(0.95D, i)) + 2))), 2, 2);
+				g.fillOval((int)(i * dx), (int)(h - (dy * ((scores[i].pp * Math.pow(0.95D, i)) + 2))), 2, 2);
 			}
-			System.out.println(linreg[0] + " + " + linreg[1] + "*x");
-			g.drawLine(0, (int)linreg[0], this.getWidth(), (int)(linreg[0] + linreg[1] * 100));
+
 			g.setColor(Color.BLUE);
-			g.drawString("Raw PP", (int)((scores.scores.size() / 2.0D) * dx), (int)(h - (dy * (scores.scores.get((int)(scores.scores.size() / 2.0D)).pp + 2))) - 2);
+			g.drawString("Raw PP", (int)((scores.length / 2.0D) * dx), (int)(h - (dy * (scores[(int)(scores.length / 2.0D)].pp + 2))) - 2);
 			g.setColor(Color.GREEN.darker());
-			g.drawString("Weighted PP", (int)((scores.scores.size() / 2.0D) * dx), (int)(h - (dy * ((scores.scores.get((int)(scores.scores.size() / 2.0D)).pp * Math.pow(0.95D, (scores.scores.size() / 2.0D))) + 2))) - 2);
+			g.drawString("Weighted PP", (int)((scores.length / 2.0D) * dx), (int)(h - (dy * ((scores[(int)(scores.length / 2.0D)].pp * Math.pow(0.95D, (scores.length / 2.0D))) + 2))) - 2);
 		}
 	}
 
@@ -349,7 +354,13 @@ public class BonusPP{
 		 * PP this user has, so this includes
 		 * bonus PP
 		 */
-		double pp_raw;
+		private double pp_raw;
+		private int count_rank_ss;
+		private int count_rank_ssh;
+		private int count_rank_s;
+		private int count_rank_sh;
+		private int count_rank_a;
+		private int playcount;
 	}
 
 	/**
@@ -364,7 +375,7 @@ public class BonusPP{
 		/**
 		 * The top scores of the user
 		 */
-		List<Score> scores;
+		private List<Score> scores;
 
 		/**
 		 * A class that follows the
@@ -379,7 +390,7 @@ public class BonusPP{
 			 * The amount of PP this
 			 * score is worth
 			 */
-			double pp;
+			private double pp;
 		}
 	}
 	
