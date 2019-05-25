@@ -1,9 +1,9 @@
 image: openjdk:8
 
 variables:
-   GIT_STRATEGY: clone
-   SSL_SELF_SIGNED: "true"
-   PROJECTNAME: "BonusPP"
+  GIT_STRATEGY: clone
+  SSL_SELF_SIGNED: "true"
+  PROJECTNAME: "BonusPP"
 
 before_script:
   - java -version
@@ -12,7 +12,7 @@ stages:
   - compile
   - status
   - javadoc
-  
+
 pending:
   allow_failure: true
   script:
@@ -32,7 +32,6 @@ failure:
     - curl ${SERVER}ci/status.sh | bash -s osu-BonusPP ${CI_COMMIT_SHA} failure
   when: on_failure
   stage: status
-
 
 verify:
   allow_failure: true
