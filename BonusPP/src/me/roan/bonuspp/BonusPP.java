@@ -250,10 +250,10 @@ public class BonusPP{
 	 * </pre>
 	 * @param ys The data set to make a regression model for
 	 * @return The linear regression equation, or more specific
-	 *         this method returns <tt><i>b</i>0</tt> and <tt><i>
-	 *         b</i>1</tt> these two values can be used to form an
-	 *         equation of the following form <tt><i>y</i> = <i>b</i>0 + 
-	 *         <i>b</i>1 * <i>x<i></tt> 
+	 *         this method returns <tt>b0</tt> and <tt>
+	 *         b1</tt> these two values can be used to form an
+	 *         equation of the following form <tt>y = b0 + 
+	 *         b1 * x</tt>.
 	 */
 	private static final double[] calculateLinearRegression(double[] ys){
 		double sumOxy = 0.0D;
