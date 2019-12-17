@@ -1,9 +1,6 @@
 # osu! Bonus PP
 
 A simple tool that can be used to calculate the amount of bonus pp and ranked scores a player has (in osu!).
-osu! forum post: [post](https://osu.ppy.sh/forum/t/538470)
-
-Public GitHub repository: [link](https://github.com/RoanH/osu-BonusPP)
 
 # Forum post
 
@@ -31,6 +28,10 @@ So have fun with the program (or not :P) and feel free to report any bugs you ma
 ## Downloads (Java required)
 - [Windows executable](https://github.com/RoanH/osu-BonusPP/releases/download/v1.2/BonusPP-v1.2.exe)
 - [Runnable Java Archive](https://github.com/RoanH/osu-BonusPP/releases/download/v1.2/BonusPP-v1.2.jar)
+
+All releases: [releases](https://github.com/RoanH/osu-BonusPP/releases)<br>
+GitHub repository: [repository](https://github.com/RoanH/osu-BonusPP)<br>
+Forum post: [post](https://osu.ppy.sh/community/forums/topics/538470)
 
 ## History
 Project development started: 26 December 2016
