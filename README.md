@@ -8,7 +8,7 @@ So a little while back a friend of mine asked me to write a program to calculate
 And after writing said program I figured, why not share it with the rest of the community?
 
 For those of you that don't know what bonus PP is, it's basically PP awarded for having passes on a certain number of maps. You can read more about this on the [wiki](https://osu.ppy.sh/wiki/Performance_Points).    
-![Bonus PP Table](https://i.ppy.sh/99970ce4d162a4dcb6d8afd86e1281b17ba095d2/687474703a2f2f772e7070792e73682f662f66372f4f7375626f6e757370702e706e67)
+![Bonus PP Table](https://i.imgur.com/sltLsB6.png)
 
 To use the program you will need an osu! API key, which you can get [here](https://osu.ppy.sh/p/api).
 
