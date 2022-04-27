@@ -1,7 +1,7 @@
 image: openjdk:8
 
 variables:
-  PROJECTNAME: "osu%2dBonusPP"
+  PROJECTNAME: "osu-BonusPP"
   PROJECT: "BonusPP"
 
 before_script:
