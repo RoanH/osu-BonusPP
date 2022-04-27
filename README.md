@@ -1,6 +1,8 @@
-# osu! Bonus PP ![](https://img.shields.io/github/release/RoanH/osu-BonusPP.svg) ![](https://img.shields.io/github/downloads/RoanH/osu-BonusPP/total.svg)
+# <img src="BonusPP/src/pp.png" width="40"/> osu! Bonus PP [![](https://img.shields.io/github/release/RoanH/osu-BonusPP.svg)](https://github.com/RoanH/osu-BonusPP/releases) [![](https://img.shields.io/github/downloads/RoanH/osu-BonusPP/total.svg)](#downloads)
 
 A simple tool that can be used to calculate the amount of bonus pp and ranked scores a player has (in osu!).
+
+[Jump directly to downloads](#downloads)
 
 # Forum post
 
