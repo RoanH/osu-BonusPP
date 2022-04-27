@@ -1,9 +1,8 @@
 image: openjdk:8
 
 variables:
-  GIT_STRATEGY: clone
-  SSL_SELF_SIGNED: "true"
-  PROJECTNAME: "BonusPP"
+  PROJECTNAME: "osu-BonusPP"
+  PROJECT: "BonusPP"
 
 before_script:
   - java -version
@@ -38,7 +37,7 @@ verify:
 
 javadoc:
   script:
-    - cd ${PROJECTNAME}
+    - cd ${PROJECT}
     - find src -name "*.java" > sources.txt
     - javadoc -cp "./lib/gson-2.3.1.jar:." -private @sources.txt
   stage: javadoc
@@ -46,7 +45,7 @@ javadoc:
 compile:
   script:
     - chmod -R 777 ./*
-    - cd ${PROJECTNAME}
+    - cd ${PROJECT}
     - ls -l
     - rm -rf ./bin
     - mkdir bin
