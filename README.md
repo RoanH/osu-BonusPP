@@ -12,7 +12,7 @@ And after writing said program I figured, why not share it with the rest of the 
 For those of you that don't know what bonus PP is, it's basically PP awarded for having passes on a certain number of maps. You can read more about this on the [wiki](https://osu.ppy.sh/wiki/Performance_Points).    
 ![Bonus PP Table](https://i.imgur.com/sltLsB6.png)
 
-To use the program you will need an osu! API key, which you can get [here](https://osu.ppy.sh/p/api).
+To use the program you will need an osu! API key, which you can get [here](https://old.ppy.sh/p/api).
 
 After you run the program you should see the following form:    
 ![Input Form](https://i.imgur.com/Ui6od74.png)
