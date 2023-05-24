@@ -10,15 +10,15 @@ So a little while back a friend of mine asked me to write a program to calculate
 And after writing said program I figured, why not share it with the rest of the community?
 
 For those of you that don't know what bonus PP is, it's basically PP awarded for having passes on a certain number of maps. You can read more about this on the [wiki](https://osu.ppy.sh/wiki/Performance_Points).    
-![Bonus PP Table](https://i.imgur.com/sltLsB6.png)
+![Bonus PP Table](https://media.roanh.dev/bonuspp/table.png)
 
-To use the program you will need an osu! API key, which you can get [here](https://old.ppy.sh/p/api).
+To use the program you will need an osu! API key, which you can get [here](https://osu.ppy.sh/home/account/edit) (under Legacy API).
 
 After you run the program you should see the following form:    
-![Input Form](https://i.imgur.com/Ui6od74.png)
+![Input Form](https://media.roanh.dev/bonuspp/input.png)
 
 After you fill in the details you should get an output like this:    
-![Output Form](https://i.imgur.com/te0XuTi.png)
+![Output Form](https://media.roanh.dev/bonuspp/output.png)
 
 It'll tell you both the amount of bonus PP you have and from that it'll also calculate the number of ranked scores/passes you have.
 Every point on the graph represents one of your top 100 scores and what it's worth both weighted and raw (I just thought it looked nice so I left it in).
